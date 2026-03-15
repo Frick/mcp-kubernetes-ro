@@ -53,10 +53,10 @@ Add the following configuration to your editor's settings to use `mcp-kubernetes
 
 ```json5
 {
-  "mcpServers": {
+  mcpServers: {
     "kubernetes-ro": {
-      "command": "mcp-kubernetes-ro",
-      "args": [
+      command: "mcp-kubernetes-ro",
+      args: [
         // Uncomment and modify as needed:
         // "--kubeconfig=/path/to/kubeconfig",
         // "--namespace=default",
@@ -66,7 +66,7 @@ Add the following configuration to your editor's settings to use `mcp-kubernetes
         // "--disabled-resources=secrets",
         // "--always-start"
       ],
-      "env": {
+      env: {
         // Set KUBECONFIG environment variable if needed:
         // "KUBECONFIG": "/path/to/kubeconfig",
         // Set MCP_KUBERNETES_RO_DISABLED_TOOLS environment variable if needed:
@@ -77,9 +77,9 @@ Add the following configuration to your editor's settings to use `mcp-kubernetes
         // "MCP_KUBERNETES_RO_DISABLED_RESOURCES": "secrets,configmaps",
         // Skip startup connectivity check via environment variable:
         // "MCP_KUBERNETES_RO_ALWAYS_START": "true"
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -89,12 +89,12 @@ You can also simplify the installation process by using it as an `npx` package:
 
 ```json5
 {
-  "mcpServers": {
+  mcpServers: {
     "kubernetes-ro": {
-      "command": "npx",
-      "args": [
+      command: "npx",
+      args: [
         "-y",
-        "@patrickdappollonio/mcp-kubernetes-ro"
+        "@patrickdappollonio/mcp-kubernetes-ro",
         // Uncomment and modify as needed:
         // "--kubeconfig=/path/to/kubeconfig",
         // "--namespace=default",
@@ -103,7 +103,7 @@ You can also simplify the installation process by using it as an `npx` package:
         // "--disabled-tools=get_logs,decode_base64",
         // "--disabled-resources=secrets"
       ],
-      "env": {
+      env: {
         // Set KUBECONFIG environment variable if needed:
         // "KUBECONFIG": "/path/to/kubeconfig",
         // Set MCP_KUBERNETES_RO_DISABLED_TOOLS environment variable if needed:
@@ -112,9 +112,9 @@ You can also simplify the installation process by using it as an `npx` package:
         // "DISABLED_TOOLS": "get_logs,decode_base64",
         // Disable access to specific resource types:
         // "MCP_KUBERNETES_RO_DISABLED_RESOURCES": "secrets,configmaps"
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -122,21 +122,23 @@ And this is how to leverage the Docker image instead:
 
 ```json5
 {
-  "mcpServers": {
+  mcpServers: {
     "kubernetes-ro": {
-      "command": "docker",
-      "args": [
+      command: "docker",
+      args: [
         "run",
         "-i",
         "--rm",
-        "-e", "KUBECONFIG=/root/.kube/config",
-        "-v", "/path/to/kubeconfig:/root/.kube/config",
-        "ghcr.io/patrickdappollonio/mcp-kubernetes-ro"
+        "-e",
+        "KUBECONFIG=/root/.kube/config",
+        "-v",
+        "/path/to/kubeconfig:/root/.kube/config",
+        "ghcr.io/patrickdappollonio/mcp-kubernetes-ro",
         // Place additional flags here, like:
         // "--disabled-tools=get_logs,decode_base64",
         // "--disabled-resources=secrets"
       ],
-      "env": {
+      env: {
         // Set KUBECONFIG environment variable if needed:
         // "KUBECONFIG": "/path/to/kubeconfig",
         // Set MCP_KUBERNETES_RO_DISABLED_TOOLS environment variable if needed:
@@ -145,9 +147,9 @@ And this is how to leverage the Docker image instead:
         // "DISABLED_TOOLS": "get_logs,decode_base64",
         // Disable access to specific resource types:
         // "MCP_KUBERNETES_RO_DISABLED_RESOURCES": "secrets,configmaps"
-      }
+      },
     },
-  }
+  },
 }
 ```
 
@@ -174,9 +176,9 @@ There are **10 tools** available by default, plus **3 additional tools** when po
 - **`get_pod_metrics`**: Get pod metrics (CPU and memory usage)
 - **`encode_base64`**: Encode text data to base64 format
 - **`decode_base64`**: Decode base64 data to text format
-- **`start_port_forward`** *(opt-in)*: Start port forwarding to a pod with one or more port mappings
-- **`stop_port_forward`** *(opt-in)*: Stop an active port-forwarding session by ID
-- **`list_port_forwards`** *(opt-in)*: List all active port-forwarding sessions
+- **`start_port_forward`** _(opt-in)_: Start port forwarding to a pod with one or more port mappings
+- **`stop_port_forward`** _(opt-in)_: Stop an active port-forwarding session by ID
+- **`list_port_forwards`** _(opt-in)_: List all active port-forwarding sessions
 
 ## Tool Management
 
@@ -201,6 +203,7 @@ Values from flags and environment variables are merged. If the `MCP_KUBERNETES_R
 When a tool is disabled, it will not be registered with the MCP server and will not appear in the available tools list. A message will be logged to stderr indicating which tools have been skipped.
 
 **Available tool names for disabling:**
+
 - `list_resources`
 - `get_resource`
 - `get_logs`
@@ -211,9 +214,9 @@ When a tool is disabled, it will not be registered with the MCP server and will 
 - `get_pod_metrics`
 - `encode_base64`
 - `decode_base64`
-- `start_port_forward` *(only when port forwarding is enabled)*
-- `stop_port_forward` *(only when port forwarding is enabled)*
-- `list_port_forwards` *(only when port forwarding is enabled)*
+- `start_port_forward` _(only when port forwarding is enabled)_
+- `stop_port_forward` _(only when port forwarding is enabled)_
+- `list_port_forwards` _(only when port forwarding is enabled)_
 
 ### Disabling Access to Specific Resources
 
@@ -280,39 +283,53 @@ In SSE mode, the server will listen on the specified port (default: 8080) and pr
 The following command-line flags are available to configure the MCP server:
 
 ### Kubernetes Configuration
+
 - `--kubeconfig=PATH`: Path to kubeconfig file (defaults to `KUBECONFIG` environment variable, then `~/.kube/config`)
 - `--namespace=NAME`: Default namespace for operations (defaults to current namespace)
 
 ### Transport Options
+
 - `--transport=TYPE`: Transport type: `stdio` or `sse` (default: `stdio`)
 - `--port=PORT`: Port for SSE server (default: 8080, only used with `--transport=sse`)
 
 ### Tool and Resource Management
+
 - `--disabled-tools=NAMES`: Tool names to disable, repeatable and comma-separated (optional)
 - `--disabled-resources=RESOURCES`: Resource types to block, repeatable and comma-separated (optional). Accepts resource names (`secrets`, `deploy`, `cm`) or full specs (`core/v1/secrets`, `apps/v1/deployments`)
 - `MCP_KUBERNETES_RO_DISABLED_TOOLS`: Environment variable for disabled tools (merged with flag values, fallback: `DISABLED_TOOLS`)
 - `MCP_KUBERNETES_RO_DISABLED_RESOURCES`: Environment variable for disabled resources (merged with flag values)
 
 ### Port Forwarding
+
 - `--enable-port-forwarding`: Enable port forwarding tools (disabled by default)
 - `MCP_KUBERNETES_RO_ENABLE_PORT_FORWARDING`: App-specific environment variable (set to `true`, `1`, or `yes`)
 - `ENABLE_PORT_FORWARDING`: Generic environment variable (set to `true`, `1`, or `yes`)
+
+### Startup and Timeout Behaviour
+
+- `--always-start`: Skip the startup connectivity check and start immediately (useful for OIDC browser-flow credentials not yet valid at process start)
+- `MCP_KUBERNETES_RO_ALWAYS_START`: Environment variable equivalent (set to `true`, `1`, or `yes`)
+- `--tool-timeout=DURATION`: Maximum time allowed for each tool call (default: `30s`). Prevents indefinite hangs from unreachable clusters or blocking credential plugins. Set to `0` to disable.
+- `MCP_KUBERNETES_RO_TOOL_TIMEOUT`: Environment variable equivalent (accepts any Go duration string, e.g. `30s`, `1m`, `0`)
 
 ### Context Configuration
 
 The server supports per-command context. This provides more flexibility when working with multiple Kubernetes clusters or contexts within the same `$KUBECONFIG` file.
 
 **Configuration Priority:**
+
 1. **Command-level context**: Use the `context` parameter in individual tool calls
 2. **Kubeconfig default**: Use the current context specified in your kubeconfig file
 
 **Kubeconfig Resolution Priority:**
+
 1. **Command-line flag**: `--kubeconfig` parameter
 2. **Environment variable**: `KUBECONFIG` environment variable
 3. **Default path**: `~/.kube/config`
 4. **In-cluster config**: Automatic detection when running inside a Kubernetes pod
 
 **Examples:**
+
 ```json
 {
   "resource_type": "pods",
@@ -322,6 +339,7 @@ The server supports per-command context. This provides more flexibility when wor
 ```
 
 This approach allows you to:
+
 - Use different contexts for different operations in the same session
 - Switch contexts per command without restarting the server
 - Maintain compatibility with existing kubeconfig setups
@@ -333,6 +351,7 @@ This approach allows you to:
 Lists any Kubernetes resources by type with optional filtering, sorted newest first.
 
 **Arguments:**
+
 - `resource_type` (required): The type of resource to list - use plural form (e.g., 'pods', 'deployments', 'services')
 - `api_version` (optional): API version for the resource (e.g., 'v1', 'apps/v1')
 - `namespace` (optional): Target namespace (leave empty for cluster-scoped resources)
@@ -343,6 +362,7 @@ Lists any Kubernetes resources by type with optional filtering, sorted newest fi
 - `continue` (optional): Continue token for pagination (from previous response)
 
 **Example:**
+
 ```json
 {
   "resource_type": "pods",
@@ -357,6 +377,7 @@ Lists any Kubernetes resources by type with optional filtering, sorted newest fi
 Gets specific resource details with complete configuration.
 
 **Arguments:**
+
 - `resource_type` (required): The type of resource to get
 - `name` (required): Resource name
 - `api_version` (optional): API version for the resource (e.g., 'v1', 'apps/v1')
@@ -364,6 +385,7 @@ Gets specific resource details with complete configuration.
 - `context` (optional): Kubernetes context to use (defaults to current context from kubeconfig)
 
 **Example:**
+
 ```json
 {
   "resource_type": "deployment",
@@ -378,6 +400,7 @@ Gets specific resource details with complete configuration.
 Gets pod logs with advanced filtering options including grep patterns, time filtering, and previous logs.
 
 **Arguments:**
+
 - `namespace` (required): Pod namespace
 - `name` (required): Pod name
 - `container` (optional): Container name (required for multi-container pods)
@@ -390,6 +413,7 @@ Gets pod logs with advanced filtering options including grep patterns, time filt
 - `previous` (optional): Return logs from the previous terminated container instance (like kubectl logs --previous)
 
 **Example:**
+
 ```json
 {
   "namespace": "default",
@@ -407,11 +431,13 @@ Gets pod logs with advanced filtering options including grep patterns, time filt
 Lists containers in a pod for log access.
 
 **Arguments:**
+
 - `namespace` (required): Pod namespace
 - `name` (required): Pod name
 - `context` (optional): Kubernetes context to use (defaults to current context from kubeconfig)
 
 **Example:**
+
 ```json
 {
   "namespace": "default",
@@ -425,9 +451,11 @@ Lists containers in a pod for log access.
 Lists available Kubernetes API resources with their details (similar to kubectl api-resources).
 
 **Arguments:**
+
 - None required
 
 **Example:**
+
 ```json
 {}
 ```
@@ -437,14 +465,17 @@ Lists available Kubernetes API resources with their details (similar to kubectl 
 Lists available Kubernetes contexts from the kubeconfig file. This is useful for discovering what contexts are available for use with the `context` parameter in other tools.
 
 **Arguments:**
+
 - None required
 
 **Example:**
+
 ```json
 {}
 ```
 
 **Example Response:**
+
 ```json
 {
   "contexts": [
@@ -472,16 +503,19 @@ Lists available Kubernetes contexts from the kubeconfig file. This is useful for
 Gets node metrics (CPU and memory usage) from the metrics server. Results are sorted by timestamp (newest first) for consistent ordering and pagination, since the built-in metrics server endpoint does not support needle-based pagination.
 
 **Arguments:**
+
 - `node_name` (optional): Specific node name to get metrics for. If not provided, returns metrics for all nodes.
 - `context` (optional): Kubernetes context to use (defaults to current context from kubeconfig)
 - `limit` (optional): Maximum number of node metrics to return. If not provided, returns all available metrics.
 - `continue` (optional): Continue token for pagination (from previous response).
 
 **Error Handling:**
+
 - If the metrics server is not available, returns an error message
 - Detects common metrics server errors and provides specific guidance
 
 **Example:**
+
 ```json
 {
   "node_name": "worker-node-1",
@@ -491,6 +525,7 @@ Gets node metrics (CPU and memory usage) from the metrics server. Results are so
 ```
 
 **Example Response (Single Node):**
+
 ```json
 {
   "kind": "NodeMetrics",
@@ -509,6 +544,7 @@ Gets node metrics (CPU and memory usage) from the metrics server. Results are so
 ```
 
 **Example Response (List with Pagination):**
+
 ```json
 {
   "kind": "NodeMetricsList",
@@ -531,6 +567,7 @@ Gets node metrics (CPU and memory usage) from the metrics server. Results are so
 Gets pod metrics (CPU and memory usage) from the metrics server. Results are sorted by timestamp (newest first) for consistent ordering and pagination, since the built-in metrics server endpoint does not support needle-based pagination.
 
 **Arguments:**
+
 - `namespace` (optional): Namespace to get pod metrics from. If not provided, returns metrics for all pods in all namespaces.
 - `pod_name` (optional): Specific pod name to get metrics for. Requires `namespace` if specified.
 - `context` (optional): Kubernetes context to use (defaults to current context from kubeconfig)
@@ -538,15 +575,18 @@ Gets pod metrics (CPU and memory usage) from the metrics server. Results are sor
 - `continue` (optional): Continue token for pagination (from previous response).
 
 **Error Handling:**
+
 - If the metrics server is not available, returns an error message
 - Detects common metrics server errors and provides specific guidance
 - Validates that `namespace` is provided when `pod_name` is specified
 
 **Pagination Notes:**
+
 - Continue tokens are context-aware and reset if the namespace context changes
 - Client-side pagination is implemented for consistent ordering and filtering
 
 **Example (Specific Pod):**
+
 ```json
 {
   "namespace": "kube-system",
@@ -556,6 +596,7 @@ Gets pod metrics (CPU and memory usage) from the metrics server. Results are sor
 ```
 
 **Example (With Pagination):**
+
 ```json
 {
   "namespace": "kube-system",
@@ -566,6 +607,7 @@ Gets pod metrics (CPU and memory usage) from the metrics server. Results are sor
 ```
 
 **Example Response (Single Pod):**
+
 ```json
 {
   "kind": "PodMetrics",
@@ -590,6 +632,7 @@ Gets pod metrics (CPU and memory usage) from the metrics server. Results are sor
 ```
 
 **Example Response (List with Pagination):**
+
 ```json
 {
   "kind": "PodMetricsList",
@@ -618,9 +661,11 @@ Gets pod metrics (CPU and memory usage) from the metrics server. Results are sor
 Encodes text data to base64 format.
 
 **Arguments:**
+
 - `data` (required): Text data to encode
 
 **Example:**
+
 ```json
 {
   "data": "username:password"
@@ -632,9 +677,11 @@ Encodes text data to base64 format.
 Decodes base64 data to text format.
 
 **Arguments:**
+
 - `data` (required): Base64 data to decode
 
 **Example:**
+
 ```json
 {
   "data": "dXNlcm5hbWU6cGFzc3dvcmQ="
@@ -660,6 +707,7 @@ When enabled, three additional tools become available:
 Establishes a port-forwarding session to a Kubernetes pod. Supports forwarding multiple ports in a single session. Each port mapping forwards a local port to a port on the pod. Set `local_port` to `0` (or omit it) to let the system auto-assign a free local port.
 
 **Arguments:**
+
 - `namespace` (required): Pod namespace
 - `pod` (required): Pod name
 - `ports` (required): Array of port mappings, each with:
@@ -668,17 +716,17 @@ Establishes a port-forwarding session to a Kubernetes pod. Supports forwarding m
 - `context` (optional): Kubernetes context to use (defaults to current context from kubeconfig)
 
 **Example (single port, auto-assign):**
+
 ```json
 {
   "namespace": "default",
   "pod": "my-app-pod-abc123",
-  "ports": [
-    { "pod_port": 8080 }
-  ]
+  "ports": [{ "pod_port": 8080 }]
 }
 ```
 
 **Example (multiple ports, explicit local ports):**
+
 ```json
 {
   "namespace": "default",
@@ -691,6 +739,7 @@ Establishes a port-forwarding session to a Kubernetes pod. Supports forwarding m
 ```
 
 **Example Response:**
+
 ```json
 {
   "id": "pf-1",
@@ -709,9 +758,11 @@ Establishes a port-forwarding session to a Kubernetes pod. Supports forwarding m
 Terminates an active port-forwarding session by its ID.
 
 **Arguments:**
+
 - `id` (required): Port forward session ID (e.g., `"pf-1"`)
 
 **Example:**
+
 ```json
 {
   "id": "pf-1"
@@ -719,6 +770,7 @@ Terminates an active port-forwarding session by its ID.
 ```
 
 **Example Response:**
+
 ```json
 {
   "id": "pf-1",
@@ -731,11 +783,13 @@ Terminates an active port-forwarding session by its ID.
 Lists all active port-forwarding sessions with their port mappings and metadata. Takes no arguments.
 
 **Example:**
+
 ```json
 {}
 ```
 
 **Example Response:**
+
 ```json
 {
   "count": 2,
@@ -744,18 +798,14 @@ Lists all active port-forwarding sessions with their port mappings and metadata.
       "id": "pf-1",
       "namespace": "default",
       "pod": "my-app-pod-abc123",
-      "ports": [
-        { "pod_port": 8080, "local_port": 18080 }
-      ],
+      "ports": [{ "pod_port": 8080, "local_port": 18080 }],
       "started_at": "2025-01-15T10:30:00Z"
     },
     {
       "id": "pf-2",
       "namespace": "monitoring",
       "pod": "grafana-xyz789",
-      "ports": [
-        { "pod_port": 3000, "local_port": 13000 }
-      ],
+      "ports": [{ "pod_port": 3000, "local_port": 13000 }],
       "started_at": "2025-01-15T10:35:00Z"
     }
   ]
@@ -773,18 +823,16 @@ Lists all active port-forwarding sessions with their port mappings and metadata.
 
 ```json5
 {
-  "mcpServers": {
+  mcpServers: {
     "kubernetes-ro": {
-      "command": "mcp-kubernetes-ro",
-      "args": [
-        "--enable-port-forwarding"
-      ],
-      "env": {
+      command: "mcp-kubernetes-ro",
+      args: ["--enable-port-forwarding"],
+      env: {
         // Or use the environment variable instead of the flag:
         // "MCP_KUBERNETES_RO_ENABLE_PORT_FORWARDING": "true"
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -853,29 +901,42 @@ mcp-kubernetes-ro \
 export MCP_KUBERNETES_RO_DISABLED_TOOLS=get_logs,decode_base64
 export MCP_KUBERNETES_RO_DISABLED_RESOURCES=secrets
 mcp-kubernetes-ro
+
+# Skip the startup connectivity check (useful for short-lived credentials)
+mcp-kubernetes-ro --always-start
+
+# Use a longer per-tool timeout for high-latency clusters or longer operations
+mcp-kubernetes-ro --tool-timeout=60s
+
+# Combine always-start with a custom timeout for automatic credential environments
+mcp-kubernetes-ro --always-start --tool-timeout=60s
 ```
 
 ## Use Cases
 
 ### Cluster Troubleshooting
+
 - List failing pods across namespaces
 - Get detailed resource configurations
 - Retrieve pod logs for debugging
 - Discover available API resources
 
 ### Resource Discovery
+
 - Explore cluster resources by type
 - Find resources with specific labels
 - Understand resource relationships
 - Identify resource configurations
 
 ### Security and Compliance
+
 - Read-only access prevents accidental changes
 - Inspect configurations without modification risk
 - Audit resource states and settings
 - Safe exploration of production clusters
 
 ### AI-Assisted Operations
+
 - Let AI assistants help diagnose cluster issues
 - Get intelligent suggestions for resource problems
 - Automated log analysis and pattern recognition
@@ -896,6 +957,7 @@ While this MCP server provides comprehensive tools for Kubernetes cluster inspec
 If your AI assistant refuses to use available tools for security reasons:
 
 1. **Direct CLI Access**: Use `kubectl` directly for sensitive operations, and just ask the AI to give you the command to run, for example:
+
    ```bash
    kubectl get secret <secret-name> -n <namespace> -o yaml
    echo "<base64-data>" | base64 -d
@@ -908,6 +970,7 @@ If your AI assistant refuses to use available tools for security reasons:
 ### Design Philosophy
 
 This behavior reflects different approaches to security:
+
 - **Tool-based**: If you have the tools and permissions, you should be able to use them
 - **AI-safety**: Prioritize preventing accidental exposure over technical capability
 
@@ -925,6 +988,7 @@ The MCP server performs an automatic connectivity check on startup to verify tha
 ### What You'll See
 
 On successful startup, you'll see output like:
+
 ```
 Testing connectivity to Kubernetes cluster...
 ✓ Successfully connected to Kubernetes cluster (version: v1.28.0)
@@ -943,7 +1007,7 @@ The connectivity check has a 10-second timeout to prevent hanging on unresponsiv
 
 ### Skipping the Connectivity Check (`--always-start`)
 
-If your credentials are granted via an OIDC browser-flow or another mechanism where the token is not yet valid when the MCP server process starts, use the `--always-start` flag (or `MCP_KUBERNETES_RO_ALWAYS_START=true` environment variable) to skip the startup connectivity check entirely:
+If your credentials are short-lived, granted via an OIDC browser-flow or another mechanism where the token is not yet valid when the MCP server process starts, use the `--always-start` flag (or `MCP_KUBERNETES_RO_ALWAYS_START=true` environment variable) to skip the startup connectivity check entirely:
 
 ```bash
 mcp-kubernetes-ro --always-start
@@ -952,6 +1016,26 @@ mcp-kubernetes-ro --always-start
 With `--always-start`, the server starts immediately without contacting the cluster. The connectivity check is effectively deferred: the first time a tool is called, it will attempt to reach the cluster normally. If the cluster is unreachable or the credentials have expired at that point, the tool will return a structured error message to the AI instructing it not to retry automatically and to prompt you to re-authenticate.
 
 Resource filters configured via `--disabled-resources` are similarly deferred: name resolution happens on the first tool call rather than at startup, so no cluster connection is required to start the server.
+
+### Per-Tool-Call Timeout (`--tool-timeout`)
+
+By default, every tool call is bounded by a **30-second timeout**. This prevents the server from hanging indefinitely when the Kubernetes cluster is unreachable or when a credential plugin blocks waiting for user interaction - for example, an OIDC browser-flow plugin that opens a local HTTP server and waits up to 3 minutes for the user to complete authentication in a browser. In a containerised or headless environment, no browser is available, so without this timeout the tool call would hang silently until the MCP client gave up. Without this setting, the server cannot instruct the AI on next steps because it is unaware of when the MCP client will time out.
+
+When this timeout fires, the resulting `context deadline exceeded` error is recognised as a connectivity/auth failure and returned to the AI as a structured message instructing it not to retry automatically and to prompt you to fix cluster connectivity, i.e. re-authenticate, connect to VPN, etc.
+
+```bash
+# Use a longer timeout for high-latency clusters
+mcp-kubernetes-ro --tool-timeout=60s
+
+# Disable the timeout entirely (not recommended with automated, short-lived credentials)
+mcp-kubernetes-ro --tool-timeout=0
+
+# Via environment variable
+export MCP_KUBERNETES_RO_TOOL_TIMEOUT=60s
+mcp-kubernetes-ro
+```
+
+The timeout applies to every tool call independently. Long-running operations such as streaming large log files will also be subject to this limit, so increase it if you regularly retrieve logs from verbose services.
 
 ## Security Considerations
 

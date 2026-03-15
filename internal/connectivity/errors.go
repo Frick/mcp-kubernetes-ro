@@ -40,6 +40,7 @@ func IsError(err error) bool {
 		"credentials",
 		// Context / timeout
 		"context deadline exceeded",
+		"context canceled",
 		// Unexpected EOF often signals the server dropped the connection
 		"unexpected eof",
 	}

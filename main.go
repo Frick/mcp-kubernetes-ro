@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/patrickdappollonio/mcp-kubernetes-ro/internal/handlers"
 	"github.com/patrickdappollonio/mcp-kubernetes-ro/internal/kubernetes"
@@ -46,6 +47,7 @@ var (
 	namespace            = flag.String("namespace", "", "Default namespace")
 	transport            = flag.String("transport", "stdio", "Transport type: stdio or sse")
 	port                 = flag.Int("port", 8080, "Port for SSE server (only used with -transport=sse)")
+	toolTimeout          = flag.Duration("tool-timeout", 30*time.Second, "Maximum time allowed for each tool call. Prevents indefinite hangs caused by unreachable clusters or blocking credential plugins (e.g. OIDC browser flows). Set to 0 to disable.")
 	disabledTools        stringSlice
 	disabledResources    stringSlice
 	enablePortForwarding = flag.Bool("enable-port-forwarding", false, "Enable port forwarding tools (start_port_forward, stop_port_forward, list_port_forwards)")
@@ -92,6 +94,18 @@ func main() {
 	if !alwaysStartEnabled {
 		if val := strings.TrimSpace(os.Getenv("MCP_KUBERNETES_RO_ALWAYS_START")); val != "" {
 			alwaysStartEnabled = strings.EqualFold(val, "true") || val == "1" || strings.EqualFold(val, "yes")
+		}
+	}
+
+	// Resolve tool-timeout from CLI or environment variable
+	toolTimeoutValue := *toolTimeout
+	if toolTimeoutValue == 30*time.Second {
+		if val := strings.TrimSpace(os.Getenv("MCP_KUBERNETES_RO_TOOL_TIMEOUT")); val != "" {
+			if parsed, parseErr := time.ParseDuration(val); parseErr == nil {
+				toolTimeoutValue = parsed
+			} else {
+				log.Fatalf("Invalid MCP_KUBERNETES_RO_TOOL_TIMEOUT value %q: %v", val, parseErr)
+			}
 		}
 	}
 
@@ -187,11 +201,32 @@ func main() {
 			"• Each session can forward multiple ports simultaneously."
 	}
 
+	serverOpts := []server.ServerOption{
+		server.WithInstructions(instructions),
+		server.WithLogging(),
+	}
+
+	// Add a per-tool-call timeout middleware when a non-zero timeout is configured.
+	// This bounds blocking exec credential plugins (e.g. OIDC browser flows) and
+	// unreachable cluster connections so they fail fast with a structured error
+	// rather than hanging until the MCP client's own request timeout fires.
+	if toolTimeoutValue > 0 {
+		fmt.Fprintf(os.Stderr, "Tool call timeout: %s\n", toolTimeoutValue)
+		serverOpts = append(serverOpts, server.WithToolHandlerMiddleware(
+			func(next server.ToolHandlerFunc) server.ToolHandlerFunc {
+				return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+					timeoutCtx, cancel := context.WithTimeout(ctx, toolTimeoutValue)
+					defer cancel()
+					return next(timeoutCtx, req)
+				}
+			},
+		))
+	}
+
 	s := server.NewMCPServer(
 		"mcp-kubernetes-ro",
 		version,
-		server.WithInstructions(instructions),
-		server.WithLogging(),
+		serverOpts...,
 	)
 
 	// Register all tools from handlers
